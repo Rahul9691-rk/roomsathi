@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RoomSathi - Room Rental System</title>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700;800&family=Hind:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --primary: #FF6B2B;
+    --primary-dark: #E55A1C;
+    --primary-light: #FFF0E8;
+    --secondary: #2B4EFF;
+    --secondary-light: #EEF1FF;
+    --dark: #1A1A2E;
+    --dark2: #16213E;
+    --text: #2C2C2C;
+    --text-muted: #6B7280;
+    --border: #E5E7EB;
+    --bg: #F8F9FF;
+    --white: #FFFFFF;
+    --success: #10B981;
+    --success-light: #ECFDF5;
+    --danger: #EF4444;
+    --danger-light: #FEF2F2;
+    --warning: #F59E0B;
+    --warning-light: #FFFBEB;
+    --card-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    --hover-shadow: 0 8px 40px rgba(0,0,0,0.14);
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Hind', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* ===== NAVIGATION ===== */
+  .navbar {
+    background: var(--dark);
+    padding: 0 2rem;
+    position: sticky; top: 0; z-index: 1000;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px; box-shadow: 0 2px 20px rgba(0,0,0,0.3);
+  }
+  .logo { font-family: 'Baloo 2', cursive; font-size: 1.6rem; font-weight: 800; color: var(--white); }
+  .logo span { color: var(--primary); }
+  .nav-links { display: flex; gap: 0.5rem; align-items: center; }
+  .nav-btn {
+    background: none; border: none; cursor: pointer;
+    padding: 8px 18px; border-radius: 8px;
+    font-family: 'Hind', sans-serif; font-size: 0.95rem; font-weight: 500;
+    transition: all 0.2s;
+  }
+  .nav-btn.active { background: var(--primary); color: var(--white); }
+  .nav-btn:not(.active) { color: #CBD5E1; }
+  .nav-btn:not(.active):hover { background: rgba(255,255,255,0.1); color: var(--white); }
+  .nav-btn.admin-btn { background: var(--secondary); color: var(--white); margin-left: 0.5rem; }
+  .nav-btn.admin-btn:hover { background: #1E3FCC; }
+
+  /* ===== VIEWS ===== */
+  .view { display: none; }
+  .view.active { display: block; }
+
+  /* ===== PUBLIC HERO ===== */
+  .hero {
+    background: linear-gradient(135deg, var(--dark) 0%, var(--dark2) 50%, #0F3460 100%);
+    padding: 5rem 2rem 6rem;
+    text-align: center; position: relative; overflow: hidden;
+  }
+  .hero::before {
+    content: ''; position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  .hero-badge {
+    display: inline-block; background: rgba(255,107,43,0.2); color: var(--primary);
+    border: 1px solid rgba(255,107,43,0.4); padding: 6px 18px;
+    border-radius: 50px; font-size: 0.85rem; font-weight: 600; margin-bottom: 1.5rem;
+  }
+  .hero h1 {
+    font-family: 'Baloo 2', cursive; font-size: clamp(2.2rem, 5vw, 3.5rem);
+    font-weight: 800; color: var(--white); line-height: 1.2; margin-bottom: 1rem;
+  }
+  .hero h1 span { color: var(--primary); }
+  .hero p { font-size: 1.1rem; color: #94A3B8; max-width: 560px; margin: 0 auto 2.5rem; line-height: 1.7; }
+  .search-bar {
+    display: flex; max-width: 680px; margin: 0 auto;
+    background: var(--white); border-radius: 12px;
+    padding: 6px; gap: 6px; box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+  }
+  .search-bar input, .search-bar select {
+    flex: 1; border: none; outline: none; padding: 12px 16px;
+    font-family: 'Hind', sans-serif; font-size: 1rem; color: var(--text);
+    background: transparent; border-radius: 8px;
+  }
+  .search-bar select { max-width: 160px; cursor: pointer; }
+  .search-bar button {
+    background: var(--primary); color: var(--white); border: none;
+    padding: 12px 28px; border-radius: 8px; font-family: 'Baloo 2', cursive;
+    font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .search-bar button:hover { background: var(--primary-dark); transform: scale(1.02); }
+  .hero-stats {
+    display: flex; justify-content: center; gap: 3rem; margin-top: 3rem;
+    flex-wrap: wrap;
+  }
+  .hero-stat { text-align: center; color: var(--white); }
+  .hero-stat strong { display: block; font-family: 'Baloo 2', cursive; font-size: 1.8rem; font-weight: 800; color: var(--primary); }
+  .hero-stat span { font-size: 0.85rem; color: #94A3B8; }
+
+  /* ===== FILTERS ===== */
+  .filters-bar {
+    background: var(--white); padding: 1rem 2rem;
+    display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap;
+    border-bottom: 1px solid var(--border); position: sticky; top: 64px; z-index: 100;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  }
+  .filter-chip {
+    border: 1.5px solid var(--border); background: var(--white);
+    padding: 7px 16px; border-radius: 50px; font-size: 0.9rem;
+    cursor: pointer; transition: all 0.2s; font-family: 'Hind', sans-serif;
+    font-weight: 500; color: var(--text-muted);
+  }
+  .filter-chip.active, .filter-chip:hover {
+    border-color: var(--primary); background: var(--primary-light); color: var(--primary);
+  }
+  .filter-label { font-size: 0.9rem; font-weight: 600; color: var(--text); margin-right: 0.25rem; }
+
+  /* ===== ROOMS GRID ===== */
+  .section { padding: 2.5rem 2rem; max-width: 1400px; margin: 0 auto; }
+  .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+  .section-title { font-family: 'Baloo 2', cursive; font-size: 1.6rem; font-weight: 700; color: var(--dark); }
+  .section-count { font-size: 0.9rem; color: var(--text-muted); background: var(--bg); padding: 6px 14px; border-radius: 50px; }
+  .rooms-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+  .room-card {
+    background: var(--white); border-radius: var(--radius);
+    overflow: hidden; box-shadow: var(--card-shadow);
+    transition: all 0.3s; cursor: pointer; position: relative;
+  }
+  .room-card:hover { transform: translateY(-6px); box-shadow: var(--hover-shadow); }
+  .room-img-wrap { position: relative; height: 200px; overflow: hidden; }
+  .room-img-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s; }
+  .room-card:hover .room-img-wrap img { transform: scale(1.08); }
+  .room-img-placeholder {
+    width: 100%; height: 100%; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 0.5rem;
+    font-size: 0.85rem; color: #94A3B8;
+  }
+  .room-img-placeholder svg { width: 48px; height: 48px; opacity: 0.5; }
+  .badge-available {
+    position: absolute; top: 12px; left: 12px;
+    background: var(--success); color: white;
+    padding: 4px 12px; border-radius: 50px; font-size: 0.75rem; font-weight: 600;
+  }
+  .badge-rented {
+    position: absolute; top: 12px; left: 12px;
+    background: var(--danger); color: white;
+    padding: 4px 12px; border-radius: 50px; font-size: 0.75rem; font-weight: 600;
+  }
+  .badge-type {
+    position: absolute; top: 12px; right: 12px;
+    background: rgba(0,0,0,0.65); color: white; backdrop-filter: blur(4px);
+    padding: 4px 12px; border-radius: 50px; font-size: 0.75rem; font-weight: 500;
+  }
+  .wishlist-btn {
+    position: absolute; bottom: 12px; right: 12px;
+    background: white; border: none; width: 34px; height: 34px;
+    border-radius: 50%; cursor: pointer; font-size: 1.1rem;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2); transition: all 0.2s;
+  }
+  .wishlist-btn:hover { transform: scale(1.1); }
+  .wishlist-btn.liked { color: var(--danger); }
+  .room-info { padding: 1rem 1.25rem; }
+  .room-name { font-family: 'Baloo 2', cursive; font-size: 1.1rem; font-weight: 700; color: var(--dark); margin-bottom: 0.25rem; }
+  .room-location { font-size: 0.875rem; color: var(--text-muted); display: flex; align-items: center; gap: 4px; margin-bottom: 0.75rem; }
+  .room-location svg { flex-shrink: 0; }
+  .room-amenities { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.75rem; }
+  .amenity-tag {
+    background: var(--bg); color: var(--text-muted);
+    padding: 3px 10px; border-radius: 50px; font-size: 0.75rem;
+    border: 1px solid var(--border);
+  }
+  .room-footer { display: flex; justify-content: space-between; align-items: center; padding-top: 0.75rem; border-top: 1px solid var(--border); }
+  .room-price { font-family: 'Baloo 2', cursive; font-size: 1.3rem; font-weight: 800; color: var(--primary); }
+  .room-price small { font-size: 0.75rem; font-weight: 400; color: var(--text-muted); font-family: 'Hind', sans-serif; }
+  .contact-btn {
+    background: var(--primary); color: white; border: none;
+    padding: 8px 18px; border-radius: 8px; font-family: 'Hind', sans-serif;
+    font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s;
+  }
+  .contact-btn:hover { background: var(--primary-dark); }
+  .no-rooms { text-align: center; padding: 4rem 2rem; color: var(--text-muted); }
+  .no-rooms svg { margin: 0 auto 1rem; display: block; opacity: 0.3; }
+
+  /* ===== MODAL ===== */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+    z-index: 2000; display: flex; align-items: center; justify-content: center;
+    padding: 1rem; backdrop-filter: blur(4px);
+  }
+  .modal-overlay.hidden { display: none; }
+  .modal {
+    background: var(--white); border-radius: 20px;
+    max-width: 700px; width: 100%; max-height: 90vh;
+    overflow-y: auto; position: relative; animation: slideUp 0.3s ease;
+  }
+  @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  .modal-close {
+    position: sticky; top: 1rem; float: right; margin: 1rem 1rem 0 0;
+    background: var(--bg); border: none; width: 36px; height: 36px;
+    border-radius: 50%; cursor: pointer; font-size: 1.2rem; z-index: 10;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .modal-img { width: 100%; height: 260px; object-fit: cover; border-radius: 20px 20px 0 0; }
+  .modal-img-placeholder {
+    width: 100%; height: 260px; background: linear-gradient(135deg, #F3F4F6, #E5E7EB);
+    border-radius: 20px 20px 0 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 1rem; color: #9CA3AF;
+  }
+  .modal-body { padding: 1.5rem 2rem 2rem; }
+  .modal-title { font-family: 'Baloo 2', cursive; font-size: 1.6rem; font-weight: 800; color: var(--dark); margin-bottom: 0.25rem; }
+  .modal-location { color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 6px; }
+  .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 1.5rem; }
+  .detail-item { background: var(--bg); border-radius: var(--radius-sm); padding: 0.75rem 1rem; }
+  .detail-item label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); font-weight: 600; }
+  .detail-item strong { display: block; font-size: 1rem; color: var(--dark); font-weight: 700; margin-top: 2px; }
+  .modal-desc { font-size: 0.95rem; line-height: 1.7; color: var(--text); margin-bottom: 1.5rem; }
+  .modal-amenities { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem; }
+  .modal-amenity {
+    background: var(--primary-light); color: var(--primary);
+    padding: 6px 14px; border-radius: 50px; font-size: 0.85rem; font-weight: 500;
+  }
+  .owner-card {
+    background: var(--bg); border-radius: var(--radius-sm); padding: 1rem 1.25rem;
+    display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;
+  }
+  .owner-avatar {
+    width: 48px; height: 48px; border-radius: 50%; background: var(--primary);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Baloo 2', cursive; font-size: 1.2rem; font-weight: 800; color: white;
+  }
+  .owner-info strong { display: block; font-weight: 700; color: var(--dark); }
+  .owner-info span { font-size: 0.875rem; color: var(--text-muted); }
+  .modal-actions { display: flex; gap: 0.75rem; }
+  .btn-call {
+    flex: 1; background: var(--success); color: white; border: none;
+    padding: 14px; border-radius: 10px; font-family: 'Hind', sans-serif;
+    font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn-call:hover { background: #059669; }
+  .btn-whatsapp {
+    flex: 1; background: #25D366; color: white; border: none;
+    padding: 14px; border-radius: 10px; font-family: 'Hind', sans-serif;
+    font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.2s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn-whatsapp:hover { background: #1DA851; }
+
+  /* ===== OWNER REGISTER ===== */
+  .register-section { max-width: 800px; margin: 0 auto; padding: 3rem 2rem; }
+  .register-header { text-align: center; margin-bottom: 3rem; }
+  .register-header h2 { font-family: 'Baloo 2', cursive; font-size: 2rem; font-weight: 800; color: var(--dark); }
+  .register-header p { color: var(--text-muted); margin-top: 0.5rem; }
+  .form-card { background: var(--white); border-radius: var(--radius); padding: 2rem; box-shadow: var(--card-shadow); }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group.full { grid-column: 1 / -1; }
+  .form-group label { font-size: 0.875rem; font-weight: 600; color: var(--text); }
+  .form-group label span { color: var(--primary); }
+  .form-group input, .form-group select, .form-group textarea {
+    padding: 10px 14px; border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+    font-family: 'Hind', sans-serif; font-size: 0.95rem; color: var(--text);
+    background: var(--white); transition: all 0.2s; outline: none;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    border-color: var(--primary); box-shadow: 0 0 0 3px rgba(255,107,43,0.12);
+  }
+  .form-group textarea { resize: vertical; min-height: 80px; }
+  .amenity-checkboxes { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; }
+  .checkbox-label {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 12px; border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm); cursor: pointer; transition: all 0.2s;
+    font-size: 0.875rem;
+  }
+  .checkbox-label:hover { border-color: var(--primary); background: var(--primary-light); }
+  .checkbox-label input[type="checkbox"] { accent-color: var(--primary); width: 16px; height: 16px; }
+  .img-upload-area {
+    border: 2px dashed var(--border); border-radius: var(--radius-sm);
+    padding: 2rem; text-align: center; cursor: pointer; transition: all 0.2s;
+  }
+  .img-upload-area:hover { border-color: var(--primary); background: var(--primary-light); }
+  .img-upload-area input { display: none; }
+  .img-preview { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; }
+  .img-preview-item { position: relative; }
+  .img-preview-item img { width: 80px; height: 80px; object-fit: cover; border-radius: 8px; }
+  .img-preview-item button { position: absolute; top: -6px; right: -6px; background: var(--danger); color: white; border: none; width: 20px; height: 20px; border-radius: 50%; cursor: pointer; font-size: 0.7rem; display: flex; align-items: center; justify-content: center; }
+  .submit-btn {
+    width: 100%; background: var(--primary); color: white; border: none;
+    padding: 15px; border-radius: var(--radius-sm); font-family: 'Baloo 2', cursive;
+    font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: all 0.2s;
+    margin-top: 1.5rem;
+  }
+  .submit-btn:hover { background: var(--primary-dark); transform: translateY(-1px); }
+  .alert { padding: 1rem 1.25rem; border-radius: var(--radius-sm); margin-bottom: 1rem; font-weight: 500; }
+  .alert-success { background: var(--success-light); color: #065F46; border: 1px solid #A7F3D0; }
+  .alert-danger { background: var(--danger-light); color: #991B1B; border: 1px solid #FECACA; }
+
+  /* ===== ADMIN LOGIN ===== */
+  .admin-login-wrap {
+    min-height: calc(100vh - 64px);
+    display: flex; align-items: center; justify-content: center; padding: 2rem;
+    background: linear-gradient(135deg, var(--dark) 0%, var(--dark2) 100%);
+  }
+  .login-card {
+    background: var(--white); border-radius: 20px; padding: 3rem;
+    max-width: 420px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  }
+  .login-card h2 { font-family: 'Baloo 2', cursive; font-size: 1.8rem; font-weight: 800; color: var(--dark); margin-bottom: 0.25rem; }
+  .login-card p { color: var(--text-muted); margin-bottom: 2rem; }
+  .login-hint { font-size: 0.8rem; color: var(--text-muted); margin-top: 1rem; text-align: center; background: var(--bg); padding: 8px; border-radius: 8px; }
+
+  /* ===== ADMIN PANEL ===== */
+  .admin-layout { display: flex; min-height: calc(100vh - 64px); }
+  .admin-sidebar {
+    width: 240px; background: var(--dark); flex-shrink: 0;
+    padding: 1.5rem 0; position: sticky; top: 64px; height: calc(100vh - 64px); overflow-y: auto;
+  }
+  .admin-sidebar-title { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: #64748B; padding: 1rem 1.5rem 0.5rem; font-weight: 700; }
+  .sidebar-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 1.5rem; cursor: pointer; transition: all 0.2s;
+    color: #94A3B8; font-size: 0.95rem; font-weight: 500; border: none; background: none;
+    width: 100%; text-align: left;
+  }
+  .sidebar-item:hover { background: rgba(255,255,255,0.06); color: var(--white); }
+  .sidebar-item.active { background: rgba(255,107,43,0.15); color: var(--primary); border-right: 3px solid var(--primary); }
+  .sidebar-item svg { flex-shrink: 0; }
+  .admin-content { flex: 1; padding: 2rem; background: var(--bg); overflow-x: auto; }
+  .admin-page { display: none; }
+  .admin-page.active { display: block; }
+  .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: gap; }
+  .admin-title { font-family: 'Baloo 2', cursive; font-size: 1.6rem; font-weight: 800; color: var(--dark); }
+  .stat-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+  .stat-card { background: var(--white); border-radius: var(--radius); padding: 1.25rem 1.5rem; box-shadow: var(--card-shadow); display: flex; align-items: center; gap: 1rem; }
+  .stat-icon { width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0; }
+  .stat-icon.orange { background: var(--primary-light); }
+  .stat-icon.blue { background: var(--secondary-light); }
+  .stat-icon.green { background: var(--success-light); }
+  .stat-icon.red { background: var(--danger-light); }
+  .stat-info label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+  .stat-info strong { display: block; font-family: 'Baloo 2', cursive; font-size: 1.8rem; font-weight: 800; color: var(--dark); line-height: 1; }
+
+  /* Tables */
+  .table-wrap { background: var(--white); border-radius: var(--radius); box-shadow: var(--card-shadow); overflow: hidden; }
+  .table-toolbar { padding: 1rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+  .table-toolbar input, .table-toolbar select {
+    padding: 8px 12px; border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+    font-family: 'Hind', sans-serif; font-size: 0.9rem; outline: none; transition: all 0.2s;
+  }
+  .table-toolbar input:focus, .table-toolbar select:focus { border-color: var(--primary); }
+  .table-toolbar input { flex: 1; min-width: 180px; }
+  table { width: 100%; border-collapse: collapse; }
+  th { background: var(--bg); padding: 12px 16px; text-align: left; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 700; color: var(--text-muted); border-bottom: 1px solid var(--border); }
+  td { padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--bg); }
+  .status-badge { padding: 4px 12px; border-radius: 50px; font-size: 0.75rem; font-weight: 700; display: inline-block; }
+  .status-badge.available { background: var(--success-light); color: #065F46; }
+  .status-badge.rented { background: var(--danger-light); color: #991B1B; }
+  .status-badge.pending { background: var(--warning-light); color: #92400E; }
+  .status-badge.approved { background: var(--success-light); color: #065F46; }
+  .status-badge.rejected { background: var(--danger-light); color: #991B1B; }
+  .action-btns { display: flex; gap: 0.4rem; }
+  .btn-sm {
+    padding: 5px 12px; border-radius: 6px; font-size: 0.8rem;
+    font-weight: 600; cursor: pointer; border: none; transition: all 0.2s;
+    font-family: 'Hind', sans-serif;
+  }
+  .btn-primary { background: var(--primary); color: white; }
+  .btn-primary:hover { background: var(--primary-dark); }
+  .btn-success { background: var(--success); color: white; }
+  .btn-success:hover { background: #059669; }
+  .btn-danger { background: var(--danger); color: white; }
+  .btn-danger:hover { background: #DC2626; }
+  .btn-secondary { background: var(--secondary); color: white; }
+  .btn-secondary:hover { background: #1E3FCC; }
+  .btn-warning { background: var(--warning); color: white; }
+  .btn-warning:hover { background: #D97706; }
+
+  /* Add Room Form in Admin */
+  .admin-form { background: var(--white); border-radius: var(--radius); padding: 2rem; box-shadow: var(--card-shadow); }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    .hero h1 { font-size: 1.8rem; }
+    .search-bar { flex-direction: column; }
+    .search-bar select { max-width: 100%; }
+    .form-grid { grid-template-columns: 1fr; }
+    .amenity-checkboxes { grid-template-columns: 1fr 1fr; }
+    .admin-sidebar { width: 200px; }
+    .detail-grid { grid-template-columns: 1fr; }
+    .modal-actions { flex-direction: column; }
+    .hero-stats { gap: 1.5rem; }
+  }
+  @media (max-width: 600px) {
+    .admin-layout { flex-direction: column; }
+    .admin-sidebar { width: 100%; height: auto; position: static; display: flex; flex-wrap: wrap; padding: 0.5rem; }
+    .sidebar-item { width: auto; border-right: none !important; border-bottom: 2px solid transparent; padding: 8px 12px; font-size: 0.8rem; }
+    .sidebar-item.active { border-bottom-color: var(--primary); }
+    .navbar { padding: 0 1rem; }
+    .nav-btn { padding: 6px 10px; font-size: 0.8rem; }
+    .logo { font-size: 1.2rem; }
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  /* Toast */
+  .toast {
+    position: fixed; bottom: 2rem; right: 2rem; z-index: 9999;
+    background: var(--dark); color: white; padding: 12px 20px;
+    border-radius: 10px; font-size: 0.9rem; font-weight: 500;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3); transform: translateY(100px); opacity: 0;
+    transition: all 0.3s; max-width: 300px;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+  .toast.success { border-left: 4px solid var(--success); }
+  .toast.error { border-left: 4px solid var(--danger); }
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <div class="logo">Room<span>Sathi</span></div>
+  <div class="nav-links">
+    <button class="nav-btn active" onclick="showView('public')">🏠 Rooms</button>
+    <button class="nav-btn" onclick="showView('register')">➕ Add</button>
+    <button class="nav-btn admin-btn" onclick="showView('admin-login')">⚙️ Admin</button>
+  </div>
+</nav>
+
+<!-- ============ PUBLIC VIEW ============ -->
+<div id="view-public" class="view active">
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-badge">🏙️ India का Sabse Trusted Room Rental Platform</div>
+    <h1>Apna Perfect <span>Room</span> Dhundo</h1>
+    <p>Students, Working Professionals aur Families ke liye — verified rooms, transparent pricing, direct owner contact.</p>
+    <div class="search-bar">
+      <input type="text" id="publicSearch" placeholder="📍 Sheher, Mohalla ya Locality..." oninput="filterPublicRooms()">
+      <select id="publicType" onchange="filterPublicRooms()">
+        <option value="">Sab Type</option>
+        <option value="Single Room">Single Room</option>
+        <option value="Double Room">Double Room</option>
+        <option value="1BHK">1BHK</option>
+        <option value="2BHK">2BHK</option>
+        <option value="PG/Hostel">PG/Hostel</option>
+        <option value="Studio">Studio</option>
+      </select>
+      <button onclick="filterPublicRooms()">🔍 Search</button>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat"><strong id="totalRoomsCount">0</strong><span>Total Rooms</span></div>
+      <div class="hero-stat"><strong id="availableRoomsCount">0</strong><span>Available</span></div>
+      <div class="hero-stat"><strong>500+</strong><span>Happy Tenants</span></div>
+      <div class="hero-stat"><strong>50+</strong><span>Cities</span></div>
+    </div>
+  </section>
+
+  <!-- Filters -->
+  <div class="filters-bar">
+    <span class="filter-label">Budget:</span>
+    <button class="filter-chip active" onclick="setBudget(this, 0, 999999)">Total</button>
+    <button class="filter-chip" onclick="setBudget(this, 0, 5000)">₹0–5K</button>
+    <button class="filter-chip" onclick="setBudget(this, 5001, 10000)">₹5K–10K</button>
+    <button class="filter-chip" onclick="setBudget(this, 10001, 20000)">₹10K–20K</button>
+    <button class="filter-chip" onclick="setBudget(this, 20001, 999999)">₹20K+</button>
+    <span class="filter-label" style="margin-left:1rem">Target:</span>
+    <button class="filter-chip active" onclick="setTarget(this, '')">Sab</button>
+    <button class="filter-chip" onclick="setTarget(this, 'Student')">👨‍🎓 Students</button>
+    <button class="filter-chip" onclick="setTarget(this, 'Working')">💼 Working</button>
+    <button class="filter-chip" onclick="setTarget(this, 'Family')">👨‍👩‍👧 Family</button>
+  </div>
+
+  <!-- Rooms -->
+  <div class="section">
+    <div class="section-header">
+      <h2 class="section-title">🏠 Available Rooms</h2>
+      <span class="section-count" id="roomCountLabel">Loading...</span>
+    </div>
+    <div class="rooms-grid" id="publicRoomsGrid"></div>
+  </div>
+</div>
+
+<!-- ============ REGISTER VIEW ============ -->
+<div id="view-register" class="view">
+  <div class="register-section">
+    <div class="register-header">
+      <h2>🏡 Apna Room Register Karo</h2>
+      <p>Apni property yahan list karein — admin approval ke baad live ho jaayega</p>
+    </div>
+    <div id="registerAlert"></div>
+    <div class="form-card">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Owner Ka Naam <span>*</span></label>
+          <input type="text" id="ownerName" placeholder="Poora naam likhein">
+        </div>
+        <div class="form-group">
+          <label>Phone Number <span>*</span></label>
+          <input type="tel" id="ownerPhone" placeholder="10 digit number">
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="ownerEmail" placeholder="your@email.com">
+        </div>
+        <div class="form-group">
+          <label>WhatsApp Number</label>
+          <input type="tel" id="ownerWhatsapp" placeholder="WhatsApp number (optional)">
+        </div>
+        <div class="form-group full">
+          <label>Room Ka Title <span>*</span></label>
+          <input type="text" id="roomTitle" placeholder="Jaise: Spacious 1BHK near Delhi University">
+        </div>
+        <div class="form-group">
+          <label>Room Ka Prakar <span>*</span></label>
+          <select id="roomType">
+            <option value="">-- Chunein --</option>
+            <option>Single Room</option>
+            <option>Double Room</option>
+            <option>1BHK</option>
+            <option>2BHK</option>
+            <option>3BHK</option>
+            <option>PG/Hostel</option>
+            <option>Studio</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Maasik Kiraya (₹) <span>*</span></label>
+          <input type="number" id="roomRent" placeholder="Jaise: 8000">
+        </div>
+        <div class="form-group">
+          <label>Sheher / Shahar <span>*</span></label>
+          <input type="text" id="roomCity" placeholder="Jaise: Delhi, Mumbai, Korba">
+        </div>
+        <div class="form-group">
+          <label>Area / Locality <span>*</span></label>
+          <input type="text" id="roomArea" placeholder="Jaise: Laxmi Nagar, Sector 15">
+        </div>
+        <div class="form-group full">
+          <label>Poora Pata <span>*</span></label>
+          <input type="text" id="roomAddress" placeholder="Gali, Mohalla, Landmark sahit">
+        </div>
+        <div class="form-group">
+          <label>Floor / Manzil</label>
+          <input type="text" id="roomFloor" placeholder="Jaise: Ground, 1st, 2nd">
+        </div>
+        <div class="form-group">
+          <label>Kiske Liye</label>
+          <select id="roomTarget">
+            <option value="Any">Sabke Liye</option>
+            <option value="Student">Students</option>
+            <option value="Working">Working Professionals</option>
+            <option value="Family">Family</option>
+            <option value="Bachelor">Bachelor</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label>Room Ki Suvidhaen (Amenities)</label>
+          <div class="amenity-checkboxes">
+            <label class="checkbox-label"><input type="checkbox" class="amenity-cb" value="WiFi"> 📶 WiFi</label>
+            <label class="checkbox-label"><input type="checkbox" class="amenity-cb" value="AC"> ❄️ AC</label>
+            <label class="checkbox-label"><input type="checkbox" class="amenity-cb" value="Geyser"> 🚿 Geyser</label>
+            <label class="checkbox-label"><input type="checkbox" class="amenity-cb" value="Parking"> 🚗 Parking</label>
+            <label class="checkbox-label"><input type="checkbox" class="amenity-cb" value="Kitchen"> 🍳 Kitchen</label>
+            <label class="checkbox-label"><input type="checkbox" class="amenity-cb" value="Washing Machine"> 🫧 Washing Machine</label>
+            <label class="checkbox-label"><input type="checkbox" class="amenity-cb" value="CCTV"> 📷 CCTV</label>
+            <label class="checkbox-label"><input type="checkbox" class="amenity-cb" value="Security Guard"> 💂 Security Guard</label>
+            <label class="checkbox-label"><input type="checkbox" class="amenity-cb" value="Power Backup"> 🔋 Power Backup</label>
+            <label class="checkbox-label"><input type="checkbox" class="amenity-cb" value="Furnished"> 🛋️ Furnished</label>
+            <label class="checkbox-label"><input type="checkbox" class="amenity-cb" value="Gym"> 🏋️ Gym</label>
+            <label class="checkbox-label"><input type="checkbox" class="amenity-cb" value="Lift"> 🛗 Lift</label>
+          </div>
+        </div>
+        <div class="form-group full">
+          <label>Room Ki Jankari (Description)</label>
+          <textarea id="roomDesc" placeholder="Room ke baare mein detail mein likhein — kya khas baat hai, rules, nearby places, etc."></textarea>
+        </div>
+        <div class="form-group full">
+          <label>Room Ki Tasveerein (Photos)</label>
+          <div class="img-upload-area" onclick="document.getElementById('roomPhotos').click()">
+            <input type="file" id="roomPhotos" multiple accept="image/*" onchange="previewImages(event)">
+            <div style="font-size:2rem">📸</div>
+            <p style="margin-top:0.5rem; font-weight:600">Photos Upload Karo</p>
+            <p style="font-size:0.85rem; color:var(--text-muted)">JPG, PNG allowed. Click karein ya drag-drop karein.</p>
+          </div>
+          <div class="img-preview" id="imgPreviewWrap"></div>
+        </div>
+      </div>
+      <button class="submit-btn" onclick="submitRoomRequest()">📤 Room Submit Karo (Admin Approval Pending)</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ ADMIN LOGIN ============ -->
+<div id="view-admin-login" class="view">
+  <div class="admin-login-wrap">
+    <div class="login-card">
+      <h2>🔐 Admin Login</h2>
+      <p>RoomSathi Admin Panel</p>
+      <div id="loginAlert"></div>
+      <div class="form-group" style="margin-bottom:1rem">
+        <label>Username</label>
+        <input type="text" id="loginUser" placeholder="admin">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="loginPass" placeholder="••••••••">
+      </div>
+      <button class="submit-btn" onclick="adminLogin()" style="margin-top:1.5rem">Login Karein →</button>
+      <div class="login-hint">Demo: Username = <b>admin</b> | Password = <b>admin123</b></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ ADMIN PANEL ============ -->
+<div id="view-admin" class="view">
+  <div class="admin-layout">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+      <div class="admin-sidebar-title">Main Menu</div>
+      <button class="sidebar-item active" onclick="showAdminPage('dashboard', this)">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </button>
+      <button class="sidebar-item" onclick="showAdminPage('pending', this)">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+        Pending Requests
+        <span id="pendingBadge" style="background:var(--danger);color:white;border-radius:50px;padding:1px 8px;font-size:0.7rem;margin-left:auto"></span>
+      </button>
+      <button class="sidebar-item" onclick="showAdminPage('rooms', this)">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        Sab Rooms
+      </button>
+      <button class="sidebar-item" onclick="showAdminPage('owners', this)">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        Owners
+      </button>
+      <button class="sidebar-item" onclick="showAdminPage('add-room', this)">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+        Room Add Karo
+      </button>
+      <div class="admin-sidebar-title" style="margin-top:1rem">Account</div>
+      <button class="sidebar-item" onclick="adminLogout()">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Logout
+      </button>
+    </aside>
+
+    <!-- Content -->
+    <main class="admin-content">
+      <!-- Dashboard -->
+      <div id="admin-dashboard" class="admin-page active">
+        <div class="admin-header">
+          <h1 class="admin-title">📊 Dashboard</h1>
+        </div>
+        <div class="stat-cards">
+          <div class="stat-card">
+            <div class="stat-icon orange">🏠</div>
+            <div class="stat-info"><label>Total Rooms</label><strong id="dashTotal">0</strong></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon green">✅</div>
+            <div class="stat-info"><label>Available</label><strong id="dashAvailable">0</strong></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon red">🔴</div>
+            <div class="stat-info"><label>Rented Out</label><strong id="dashRented">0</strong></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon orange">⏳</div>
+            <div class="stat-info"><label>Pending</label><strong id="dashPending">0</strong></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon blue">👥</div>
+            <div class="stat-info"><label>Owners</label><strong id="dashOwners">0</strong></div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <div style="padding:1.25rem 1.5rem; border-bottom:1px solid var(--border)">
+            <strong style="font-family:'Baloo 2',cursive; font-size:1.1rem;">🕐 Recent Rooms</strong>
+          </div>
+          <table>
+            <thead><tr><th>Room</th><th>Location</th><th>Type</th><th>Rent</th><th>Status</th></tr></thead>
+            <tbody id="dashRecentTable"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Pending Requests -->
+      <div id="admin-pending" class="admin-page">
+        <div class="admin-header">
+          <h1 class="admin-title">⏳ Pending Room Requests</h1>
+        </div>
+        <div class="table-wrap">
+          <div class="table-toolbar">
+            <input type="text" id="pendingSearch" placeholder="🔍 Room ya Owner name..." oninput="renderPending()">
+          </div>
+          <table>
+            <thead><tr><th>Room Title</th><th>Owner</th><th>Phone</th><th>Location</th><th>Rent</th><th>Actions</th></tr></thead>
+            <tbody id="pendingTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- All Rooms -->
+      <div id="admin-rooms" class="admin-page">
+        <div class="admin-header">
+          <h1 class="admin-title">🏠 Sab Rooms</h1>
+        </div>
+        <div class="table-wrap">
+          <div class="table-toolbar">
+            <input type="text" id="roomSearch" placeholder="🔍 Search rooms..." oninput="renderAdminRooms()">
+            <select id="roomFilterStatus" onchange="renderAdminRooms()">
+              <option value="">Sab Status</option>
+              <option value="available">Available</option>
+              <option value="rented">Rented</option>
+            </select>
+            <select id="roomFilterType" onchange="renderAdminRooms()">
+              <option value="">Sab Type</option>
+              <option>Single Room</option><option>Double Room</option>
+              <option>1BHK</option><option>2BHK</option><option>3BHK</option>
+              <option>PG/Hostel</option><option>Studio</option>
+            </select>
+          </div>
+          <table>
+            <thead><tr><th>Room</th><th>Owner</th><th>Location</th><th>Rent</th><th>Type</th><th>Target</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="adminRoomsBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Owners -->
+      <div id="admin-owners" class="admin-page">
+        <div class="admin-header">
+          <h1 class="admin-title">👥 Room Owners</h1>
+          <button class="btn-sm btn-primary" onclick="showAdminPage('add-owner-form', null); document.getElementById('addOwnerInline').style.display='block'">+ New Owner</button>
+        </div>
+        <div id="addOwnerInline" style="display:none; margin-bottom:1.5rem">
+          <div class="admin-form">
+            <h3 style="font-family:'Baloo 2',cursive; margin-bottom:1.25rem">➕ Naya Owner Register Karo</h3>
+            <div class="form-grid">
+              <div class="form-group"><label>Naam <span style="color:var(--primary)">*</span></label><input type="text" id="adOwnerName" placeholder="Owner ka naam"></div>
+              <div class="form-group"><label>Phone <span style="color:var(--primary)">*</span></label><input type="tel" id="adOwnerPhone" placeholder="Phone number"></div>
+              <div class="form-group"><label>Email</label><input type="email" id="adOwnerEmail" placeholder="email@example.com"></div>
+              <div class="form-group"><label>Sheher</label><input type="text" id="adOwnerCity" placeholder="City"></div>
+            </div>
+            <div style="display:flex; gap:0.75rem; margin-top:1rem">
+              <button class="btn-sm btn-primary" onclick="adminAddOwner()">✅ Save Karo</button>
+              <button class="btn-sm btn-danger" onclick="document.getElementById('addOwnerInline').style.display='none'">Bंद Karo</button>
+            </div>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <div class="table-toolbar">
+            <input type="text" id="ownerSearch" placeholder="🔍 Owner naam ya phone..." oninput="renderOwners()">
+          </div>
+          <table>
+            <thead><tr><th>Owner</th><th>Phone</th><th>Email</th><th>Sheher</th><th>Rooms</th><th>Actions</th></tr></thead>
+            <tbody id="ownersTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Add Room -->
+      <div id="admin-add-room" class="admin-page">
+        <div class="admin-header">
+          <h1 class="admin-title">➕ Naya Room Add Karo</h1>
+        </div>
+        <div class="admin-form">
+          <div class="form-grid">
+            <div class="form-group"><label>Room Title <span style="color:var(--primary)">*</span></label><input type="text" id="adTitle" placeholder="Room ka naam/title"></div>
+            <div class="form-group"><label>Owner <span style="color:var(--primary)">*</span></label>
+              <select id="adOwner"><option value="">-- Owner Chunein --</option></select>
+            </div>
+            <div class="form-group"><label>Room Type <span style="color:var(--primary)">*</span></label>
+              <select id="adType"><option value="">-- Type Chunein --</option><option>Single Room</option><option>Double Room</option><option>1BHK</option><option>2BHK</option><option>3BHK</option><option>PG/Hostel</option><option>Studio</option></select>
+            </div>
+            <div class="form-group"><label>Maasik Kiraya (₹) <span style="color:var(--primary)">*</span></label><input type="number" id="adRent" placeholder="8000"></div>
+            <div class="form-group"><label>Sheher <span style="color:var(--primary)">*</span></label><input type="text" id="adCity" placeholder="Delhi, Mumbai, Korba..."></div>
+            <div class="form-group"><label>Area <span style="color:var(--primary)">*</span></label><input type="text" id="adArea" placeholder="Locality / Mohalla"></div>
+            <div class="form-group full"><label>Poora Pata <span style="color:var(--primary)">*</span></label><input type="text" id="adAddress" placeholder="Full address"></div>
+            <div class="form-group"><label>Floor</label><input type="text" id="adFloor" placeholder="Ground, 1st, 2nd..."></div>
+            <div class="form-group"><label>Kiske Liye</label>
+              <select id="adTarget"><option value="Any">Sabke Liye</option><option value="Student">Students</option><option value="Working">Working Professionals</option><option value="Family">Family</option><option value="Bachelor">Bachelor</option></select>
+            </div>
+            <div class="form-group"><label>Status</label>
+              <select id="adStatus"><option value="available">Available</option><option value="rented">Rented</option></select>
+            </div>
+            <div class="form-group full"><label>Suvidhaen (Amenities)</label>
+              <div class="amenity-checkboxes">
+                <label class="checkbox-label"><input type="checkbox" class="ad-amenity" value="WiFi"> 📶 WiFi</label>
+                <label class="checkbox-label"><input type="checkbox" class="ad-amenity" value="AC"> ❄️ AC</label>
+                <label class="checkbox-label"><input type="checkbox" class="ad-amenity" value="Geyser"> 🚿 Geyser</label>
+                <label class="checkbox-label"><input type="checkbox" class="ad-amenity" value="Parking"> 🚗 Parking</label>
+                <label class="checkbox-label"><input type="checkbox" class="ad-amenity" value="Kitchen"> 🍳 Kitchen</label>
+                <label class="checkbox-label"><input type="checkbox" class="ad-amenity" value="Washing Machine"> 🫧 Washing Machine</label>
+                <label class="checkbox-label"><input type="checkbox" class="ad-amenity" value="CCTV"> 📷 CCTV</label>
+                <label class="checkbox-label"><input type="checkbox" class="ad-amenity" value="Furnished"> 🛋️ Furnished</label>
+                <label class="checkbox-label"><input type="checkbox" class="ad-amenity" value="Power Backup"> 🔋 Power Backup</label>
+              </div>
+            </div>
+            <div class="form-group full"><label>Description</label><textarea id="adDesc" placeholder="Room ki detail mein jankari..."></textarea></div>
+            <div class="form-group full"><label>Room Photo URL (optional)</label><input type="text" id="adPhoto" placeholder="Image URL ya blank chhod sakte hain"></div>
+          </div>
+          <button class="submit-btn" onclick="adminAddRoom()">✅ Room Add Karo</button>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ROOM DETAIL MODAL -->
+<div id="roomModal" class="modal-overlay hidden" onclick="closeModalOnBg(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="toast"></div>
+
+<script>
+// ============ DATA STORE ============
+let rooms = JSON.parse(localStorage.getItem('rs_rooms') || '[]');
+let owners = JSON.parse(localStorage.getItem('rs_owners') || '[]');
+let pending = JSON.parse(localStorage.getItem('rs_pending') || '[]');
+
+// Budget and target filters
+let budgetMin = 0, budgetMax = 999999, targetFilter = '';
+
+// Seed demo data if empty
+if (rooms.length === 0) {
+  owners = [
+    { id: 'o1', name: 'Ramesh Kumar', phone: '9876543210', email: 'ramesh@mail.com', city: 'Delhi', whatsapp: '9876543210' },
+    { id: 'o2', name: 'Priya Sharma', phone: '8765432109', email: 'priya@mail.com', city: 'Mumbai', whatsapp: '8765432109' },
+    { id: 'o3', name: 'Suresh Yadav', phone: '7654321098', email: 'suresh@mail.com', city: 'Korba', whatsapp: '7654321098' },
+  ];
+  rooms = [
+    { id: 'r1', title: 'Spacious 1BHK near Delhi University', type: '1BHK', rent: 9500, city: 'Delhi', area: 'Kamla Nagar', address: 'House No. 42, Kamla Nagar, Delhi', floor: '2nd', target: 'Student', amenities: ['WiFi', 'Geyser', 'Kitchen', 'Power Backup'], desc: 'Fully furnished 1BHK near Delhi University. Ideal for students. 24/7 water supply, easy transport.', ownerId: 'o1', status: 'available', photo: '', createdAt: Date.now() },
+    { id: 'r2', title: 'AC Double Room in Andheri', type: 'Double Room', rent: 12000, city: 'Mumbai', area: 'Andheri West', address: 'Plot 7, Andheri West, Mumbai', floor: '1st', target: 'Working', amenities: ['WiFi', 'AC', 'Washing Machine', 'CCTV', 'Parking'], desc: 'Premium double room in prime Mumbai location. Best for working professionals.', ownerId: 'o2', status: 'available', photo: '', createdAt: Date.now() - 86400000 },
+    { id: 'r3', title: 'Budget PG near Korba College', type: 'PG/Hostel', rent: 4000, city: 'Korba', area: 'Station Road', address: 'Near Railway Station, Korba, CG', floor: 'Ground', target: 'Student', amenities: ['WiFi', 'Kitchen', 'Security Guard'], desc: 'Affordable PG for students near Korba College. Mess facility available separately.', ownerId: 'o3', status: 'available', photo: '', createdAt: Date.now() - 172800000 },
+    { id: 'r4', title: '2BHK Family Flat in Lajpat Nagar', type: '2BHK', rent: 22000, city: 'Delhi', area: 'Lajpat Nagar', address: 'C-Block, Lajpat Nagar II, Delhi', floor: '3rd', target: 'Family', amenities: ['AC', 'Parking', 'Lift', 'CCTV', 'Power Backup', 'Furnished'], desc: 'Premium 2BHK for families. Fully furnished, gated society, near market and metro.', ownerId: 'o1', status: 'available', photo: '', createdAt: Date.now() - 259200000 },
+    { id: 'r5', title: 'Studio Apartment near IT Park', type: 'Studio', rent: 15000, city: 'Pune', area: 'Hinjewadi', address: 'IT Park Road, Phase 1, Hinjewadi, Pune', floor: '4th', target: 'Working', amenities: ['WiFi', 'AC', 'Gym', 'Parking', 'Lift', 'CCTV'], desc: 'Modern studio apartment near Hinjewadi IT Park. Best for software engineers.', ownerId: 'o2', status: 'rented', photo: '', createdAt: Date.now() - 345600000 },
+    { id: 'r6', title: 'Single Room Boys PG near AIIMS', type: 'Single Room', rent: 6500, city: 'Delhi', area: 'Green Park', address: 'Near AIIMS Gate 3, Green Park, Delhi', floor: '1st', target: 'Student', amenities: ['WiFi', 'Geyser', 'Power Backup'], desc: 'Clean single room for medical students near AIIMS. 10 min walk to AIIMS gate.', ownerId: 'o1', status: 'available', photo: '', createdAt: Date.now() - 432000000 },
+  ];
+  saveData();
+}
+
+function saveData() {
+  localStorage.setItem('rs_rooms', JSON.stringify(rooms));
+  localStorage.setItem('rs_owners', JSON.stringify(owners));
+  localStorage.setItem('rs_pending', JSON.stringify(pending));
+}
+
+function getOwner(id) { return owners.find(o => o.id === id) || {}; }
+
+// ============ VIEWS ============
+function showView(v) {
+  document.querySelectorAll('.view').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(el => el.classList.remove('active'));
+  if (v === 'admin') {
+    document.getElementById('view-admin').classList.add('active');
+    document.querySelector('.nav-btn.admin-btn').classList.add('active');
+    refreshAdminData();
+  } else if (v === 'admin-login') {
+    const loggedIn = sessionStorage.getItem('rs_admin');
+    if (loggedIn) { showView('admin'); return; }
+    document.getElementById('view-admin-login').classList.add('active');
+    document.querySelector('.nav-btn.admin-btn').classList.add('active');
+  } else if (v === 'public') {
+    document.getElementById('view-public').classList.add('active');
+    document.querySelectorAll('.nav-btn')[0].classList.add('active');
+    renderPublicRooms();
+    updateHeroStats();
+  } else if (v === 'register') {
+    document.getElementById('view-register').classList.add('active');
+    document.querySelectorAll('.nav-btn')[1].classList.add('active');
+  }
+}
+
+// ============ PUBLIC ROOMS ============
+function updateHeroStats() {
+  const approved = rooms.filter(r => r.status !== 'pending_approval');
+  document.getElementById('totalRoomsCount').textContent = approved.length;
+  document.getElementById('availableRoomsCount').textContent = approved.filter(r => r.status === 'available').length;
+}
+
+function renderPublicRooms() {
+  const searchQ = (document.getElementById('publicSearch')?.value || '').toLowerCase();
+  const typeQ = document.getElementById('publicType')?.value || '';
+  const grid = document.getElementById('publicRoomsGrid');
+  
+  let filtered = rooms.filter(r => r.status !== 'pending_approval');
+  
+  if (searchQ) filtered = filtered.filter(r =>
+    r.title.toLowerCase().includes(searchQ) ||
+    r.city.toLowerCase().includes(searchQ) ||
+    r.area.toLowerCase().includes(searchQ) ||
+    r.address.toLowerCase().includes(searchQ)
+  );
+  if (typeQ) filtered = filtered.filter(r => r.type === typeQ);
+  if (budgetMin > 0 || budgetMax < 999999) filtered = filtered.filter(r => r.rent >= budgetMin && r.rent <= budgetMax);
+  if (targetFilter) filtered = filtered.filter(r => r.target === targetFilter || r.target === 'Any');
+  
+  document.getElementById('roomCountLabel').textContent = `${filtered.length} Room${filtered.length !== 1 ? 's' : ''} mile`;
+  
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div class="no-rooms" style="grid-column:1/-1">
+      <svg width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <h3 style="font-family:'Baloo 2',cursive; font-size:1.3rem; color:var(--dark); margin-bottom:0.5rem">Koi Room Nahi Mila</h3>
+      <p>Filter change karein ya search clear karein</p>
+    </div>`;
+    return;
+  }
+  
+  grid.innerHTML = filtered.map(room => {
+    const owner = getOwner(room.ownerId);
+    const amenityTags = (room.amenities || []).slice(0, 3).map(a => `<span class="amenity-tag">${a}</span>`).join('');
+    const imgContent = room.photo
+      ? `<img src="${room.photo}" alt="${room.title}" loading="lazy">`
+      : `<div class="room-img-placeholder" style="background:${getGradient(room.type)}">
+          <svg width="48" height="48" fill="none" stroke="white" stroke-width="1.5" viewBox="0 0 24 24" opacity="0.7"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <span style="color:white; font-weight:600; font-size:0.9rem">${room.type}</span>
+        </div>`;
+    return `<div class="room-card" onclick="openRoomModal('${room.id}')">
+      <div class="room-img-wrap">
+        ${imgContent}
+        <span class="${room.status === 'available' ? 'badge-available' : 'badge-rented'}">${room.status === 'available' ? '✅ Available' : '🔴 Rented'}</span>
+        <span class="badge-type">${room.type}</span>
+        <button class="wishlist-btn" onclick="event.stopPropagation(); toggleWishlist(this)">🤍</button>
+      </div>
+      <div class="room-info">
+        <div class="room-name">${room.title}</div>
+        <div class="room-location">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          ${room.area}, ${room.city}
+        </div>
+        <div class="room-amenities">${amenityTags}${room.amenities && room.amenities.length > 3 ? `<span class="amenity-tag">+${room.amenities.length-3} more</span>` : ''}</div>
+        <div class="room-footer">
+          <div class="room-price">₹${room.rent.toLocaleString()} <small>/month</small></div>
+          <button class="contact-btn" onclick="event.stopPropagation(); contactOwner('${owner.phone}')">📞 Contact</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function getGradient(type) {
+  const g = { '1BHK': 'linear-gradient(135deg,#667eea,#764ba2)', '2BHK': 'linear-gradient(135deg,#f093fb,#f5576c)', 'Single Room': 'linear-gradient(135deg,#4facfe,#00f2fe)', 'Double Room': 'linear-gradient(135deg,#43e97b,#38f9d7)', 'PG/Hostel': 'linear-gradient(135deg,#fa709a,#fee140)', 'Studio': 'linear-gradient(135deg,#a18cd1,#fbc2eb)', '3BHK': 'linear-gradient(135deg,#ffecd2,#fcb69f)' };
+  return g[type] || 'linear-gradient(135deg,#667eea,#764ba2)';
+}
+
+function filterPublicRooms() { renderPublicRooms(); }
+
+function setBudget(el, min, max) {
+  document.querySelectorAll('.filters-bar .filter-chip').forEach((c, i) => { if (i < 5) c.classList.remove('active'); });
+  el.classList.add('active');
+  budgetMin = min; budgetMax = max;
+  renderPublicRooms();
+}
+
+function setTarget(el, t) {
+  const chips = document.querySelectorAll('.filters-bar .filter-chip');
+  chips.forEach((c, i) => { if (i >= 5) c.classList.remove('active'); });
+  el.classList.add('active');
+  targetFilter = t;
+  renderPublicRooms();
+}
+
+function toggleWishlist(btn) {
+  btn.classList.toggle('liked');
+  btn.textContent = btn.classList.contains('liked') ? '❤️' : '🤍';
+}
+
+// ============ ROOM MODAL ============
+function openRoomModal(id) {
+  const room = rooms.find(r => r.id === id);
+  if (!room) return;
+  const owner = getOwner(room.ownerId);
+  const imgContent = room.photo
+    ? `<img class="modal-img" src="${room.photo}" alt="${room.title}">`
+    : `<div class="modal-img-placeholder" style="background:${getGradient(room.type)}">
+        <svg width="64" height="64" fill="none" stroke="white" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+        <span style="color:white; font-weight:600; font-size:1rem">${room.type}</span>
+      </div>`;
+  const amenityHtml = (room.amenities || []).map(a => `<span class="modal-amenity">${a}</span>`).join('');
+  const ownerInitials = (owner.name || 'O').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+  
+  document.getElementById('modalContent').innerHTML = `
+    ${imgContent}
+    <div class="modal-body">
+      <h2 class="modal-title">${room.title}</h2>
+      <div class="modal-location">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        ${room.address}
+      </div>
+      <div class="detail-grid">
+        <div class="detail-item"><label>Maasik Kiraya</label><strong style="color:var(--primary); font-size:1.3rem">₹${room.rent.toLocaleString()}/month</strong></div>
+        <div class="detail-item"><label>Room Type</label><strong>${room.type}</strong></div>
+        <div class="detail-item"><label>Area</label><strong>${room.area}, ${room.city}</strong></div>
+        <div class="detail-item"><label>Manzil</label><strong>${room.floor || 'N/A'}</strong></div>
+        <div class="detail-item"><label>Kiske Liye</label><strong>${room.target || 'Sab'}</strong></div>
+        <div class="detail-item"><label>Status</label><strong style="color:${room.status === 'available' ? 'var(--success)' : 'var(--danger)'}">${room.status === 'available' ? '✅ Available' : '🔴 Rented'}</strong></div>
+      </div>
+      ${room.desc ? `<p class="modal-desc">${room.desc}</p>` : ''}
+      ${amenityHtml ? `<div class="modal-amenities">${amenityHtml}</div>` : ''}
+      <div class="owner-card">
+        <div class="owner-avatar">${ownerInitials}</div>
+        <div class="owner-info">
+          <strong>${owner.name || 'Owner'}</strong>
+          <span>📞 ${owner.phone || 'N/A'}</span>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-call" onclick="contactOwner('${owner.phone}')">📞 Call Owner</button>
+        <button class="btn-whatsapp" onclick="whatsappOwner('${owner.whatsapp || owner.phone}', '${room.title}')">💬 WhatsApp</button>
+      </div>
+    </div>`;
+  document.getElementById('roomModal').classList.remove('hidden');
+}
+
+function closeModal() { document.getElementById('roomModal').classList.add('hidden'); }
+function closeModalOnBg(e) { if (e.target === document.getElementById('roomModal')) closeModal(); }
+function contactOwner(phone) { if (phone) { showToast('📞 Calling ' + phone, 'success'); } }
+function whatsappOwner(phone, title) { if (phone) window.open(`https://wa.me/91${phone}?text=Hello, I'm interested in your room: ${encodeURIComponent(title)}`, '_blank'); }
+
+// ============ OWNER REGISTER FORM ============
+let uploadedPhotos = [];
+function previewImages(e) {
+  const files = e.target.files;
+  const preview = document.getElementById('imgPreviewWrap');
+  for (const file of files) {
+    const reader = new FileReader();
+    reader.onload = ev => {
+      const idx = uploadedPhotos.push(ev.target.result) - 1;
+      const div = document.createElement('div');
+      div.className = 'img-preview-item';
+      div.innerHTML = `<img src="${ev.target.result}"><button onclick="removePhoto(${idx}, this.parentElement)">✕</button>`;
+      preview.appendChild(div);
+    };
+    reader.readAsDataURL(file);
+  }
+}
+function removePhoto(idx, el) { uploadedPhotos[idx] = null; el.remove(); }
+
+function submitRoomRequest() {
+  const v = f => document.getElementById(f)?.value?.trim();
+  const fields = ['ownerName','ownerPhone','roomTitle','roomType','roomRent','roomCity','roomArea','roomAddress'];
+  for (const f of fields) { if (!v(f)) { showAlert('registerAlert', 'Sabhi starred (*) fields fill karein!', 'danger'); return; } }
+  
+  const amenities = [...document.querySelectorAll('.amenity-cb:checked')].map(c => c.value);
+  const photo = uploadedPhotos.filter(Boolean)[0] || '';
+  
+  const req = {
+    id: 'p' + Date.now(),
+    ownerName: v('ownerName'), ownerPhone: v('ownerPhone'), ownerEmail: v('ownerEmail'),
+    ownerWhatsapp: v('ownerWhatsapp'),
+    title: v('roomTitle'), type: v('roomType'), rent: parseInt(v('roomRent')),
+    city: v('roomCity'), area: v('roomArea'), address: v('roomAddress'),
+    floor: v('roomFloor'), target: v('roomTarget') || 'Any',
+    amenities, desc: v('roomDesc'), photo,
+    status: 'pending', createdAt: Date.now()
+  };
+  
+  pending.push(req);
+  saveData();
+  showAlert('registerAlert', '✅ Room request submit ho gaya! Admin approval ke baad live ho jaayega. Shukriya!', 'success');
+  document.querySelectorAll('#view-register input, #view-register select, #view-register textarea').forEach(el => el.value = '');
+  document.querySelectorAll('.amenity-cb').forEach(cb => cb.checked = false);
+  document.getElementById('imgPreviewWrap').innerHTML = '';
+  uploadedPhotos = [];
+}
+
+// ============ ADMIN LOGIN ============
+function adminLogin() {
+  const u = document.getElementById('loginUser').value;
+  const p = document.getElementById('loginPass').value;
+  if (u === 'admin' && p === 'admin123') {
+    sessionStorage.setItem('rs_admin', '1');
+    showView('admin');
+  } else {
+    showAlert('loginAlert', '❌ Galat username ya password!', 'danger');
+  }
+}
+function adminLogout() { sessionStorage.removeItem('rs_admin'); showView('public'); }
+
+// ============ ADMIN PAGES ============
+function showAdminPage(p, el) {
+  document.querySelectorAll('.admin-page').forEach(pg => pg.classList.remove('active'));
+  document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
+  const page = document.getElementById('admin-' + p);
+  if (page) page.classList.add('active');
+  if (el) el.classList.add('active');
+  refreshAdminData();
+}
+
+function refreshAdminData() {
+  // Dashboard stats
+  const approved = rooms.filter(r => r.status !== 'pending_approval');
+  document.getElementById('dashTotal').textContent = approved.length;
+  document.getElementById('dashAvailable').textContent = approved.filter(r => r.status === 'available').length;
+  document.getElementById('dashRented').textContent = approved.filter(r => r.status === 'rented').length;
+  document.getElementById('dashPending').textContent = pending.filter(r => r.status === 'pending').length;
+  document.getElementById('dashOwners').textContent = owners.length;
+  
+  const badge = document.getElementById('pendingBadge');
+  const pCount = pending.filter(r => r.status === 'pending').length;
+  badge.textContent = pCount > 0 ? pCount : '';
+  
+  // Recent rooms table
+  const tbody = document.getElementById('dashRecentTable');
+  const recent = [...rooms].sort((a, b) => b.createdAt - a.createdAt).slice(0, 5);
+  tbody.innerHTML = recent.map(r => {
+    const owner = getOwner(r.ownerId);
+    return `<tr><td><strong>${r.title}</strong><br><small style="color:var(--text-muted)">${owner.name || ''}</small></td><td>${r.area}, ${r.city}</td><td>${r.type}</td><td>₹${r.rent.toLocaleString()}</td><td><span class="status-badge ${r.status}">${r.status === 'available' ? 'Available' : 'Rented'}</span></td></tr>`;
+  }).join('');
+  
+  renderPending();
+  renderAdminRooms();
+  renderOwners();
+  populateOwnerSelect();
+}
+
+// Pending
+function renderPending() {
+  const q = (document.getElementById('pendingSearch')?.value || '').toLowerCase();
+  const list = pending.filter(r => r.status === 'pending' && (!q || r.title.toLowerCase().includes(q) || r.ownerName.toLowerCase().includes(q)));
+  const tbody = document.getElementById('pendingTableBody');
+  if (list.length === 0) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:2rem; color:var(--text-muted)">Koi pending request nahi hai ✅</td></tr>'; return; }
+  tbody.innerHTML = list.map(r => `<tr>
+    <td><strong>${r.title}</strong><br><small>${r.type}</small></td>
+    <td>${r.ownerName}</td>
+    <td>${r.ownerPhone}</td>
+    <td>${r.area}, ${r.city}</td>
+    <td>₹${r.rent.toLocaleString()}</td>
+    <td>
+      <div class="action-btns">
+        <button class="btn-sm btn-success" onclick="approvePending('${r.id}')">✅ Approve</button>
+        <button class="btn-sm btn-danger" onclick="rejectPending('${r.id}')">❌ Reject</button>
+      </div>
+    </td>
+  </tr>`).join('');
+}
+
+function approvePending(id) {
+  const req = pending.find(r => r.id === id);
+  if (!req) return;
+  
+  // Create or find owner
+  let owner = owners.find(o => o.phone === req.ownerPhone);
+  if (!owner) {
+    owner = { id: 'o' + Date.now(), name: req.ownerName, phone: req.ownerPhone, email: req.ownerEmail || '', city: req.city, whatsapp: req.ownerWhatsapp || req.ownerPhone };
+    owners.push(owner);
+  }
+  
+  rooms.push({ id: 'r' + Date.now(), title: req.title, type: req.type, rent: req.rent, city: req.city, area: req.area, address: req.address, floor: req.floor, target: req.target, amenities: req.amenities, desc: req.desc, photo: req.photo, ownerId: owner.id, status: 'available', createdAt: Date.now() });
+  req.status = 'approved';
+  saveData(); refreshAdminData();
+  showToast('✅ Room approve ho gaya aur live ho gaya!', 'success');
+}
+
+function rejectPending(id) {
+  const req = pending.find(r => r.id === id);
+  if (req) { req.status = 'rejected'; saveData(); refreshAdminData(); showToast('❌ Request reject kar di gayi', 'error'); }
+}
+
+// All Rooms
+function renderAdminRooms() {
+  const q = (document.getElementById('roomSearch')?.value || '').toLowerCase();
+  const status = document.getElementById('roomFilterStatus')?.value || '';
+  const type = document.getElementById('roomFilterType')?.value || '';
+  let list = rooms.filter(r => {
+    const owner = getOwner(r.ownerId);
+    return (!q || r.title.toLowerCase().includes(q) || r.city.toLowerCase().includes(q) || (owner.name || '').toLowerCase().includes(q)) &&
+      (!status || r.status === status) && (!type || r.type === type);
+  });
+  const tbody = document.getElementById('adminRoomsBody');
+  if (!tbody) return;
+  if (list.length === 0) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:2rem; color:var(--text-muted)">Koi room nahi mila</td></tr>'; return; }
+  tbody.innerHTML = list.map(r => {
+    const owner = getOwner(r.ownerId);
+    return `<tr>
+      <td><strong>${r.title}</strong></td>
+      <td>${owner.name || 'N/A'}</td>
+      <td>${r.area}, ${r.city}</td>
+      <td>₹${r.rent.toLocaleString()}</td>
+      <td>${r.type}</td>
+      <td>${r.target || 'Any'}</td>
+      <td><span class="status-badge ${r.status}">${r.status === 'available' ? 'Available' : 'Rented'}</span></td>
+      <td>
+        <div class="action-btns">
+          <button class="btn-sm ${r.status === 'available' ? 'btn-warning' : 'btn-success'}" onclick="toggleRoomStatus('${r.id}')">${r.status === 'available' ? '🔴 Rented' : '✅ Available'}</button>
+          <button class="btn-sm btn-danger" onclick="deleteRoom('${r.id}')">🗑️</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function toggleRoomStatus(id) {
+  const room = rooms.find(r => r.id === id);
+  if (room) { room.status = room.status === 'available' ? 'rented' : 'available'; saveData(); refreshAdminData(); showToast('Status update ho gaya!', 'success'); }
+}
+function deleteRoom(id) {
+  if (!confirm('Kya aap is room ko delete karna chahte hain?')) return;
+  rooms = rooms.filter(r => r.id !== id); saveData(); refreshAdminData(); showToast('🗑️ Room delete ho gaya', 'error');
+}
+
+// Owners
+function renderOwners() {
+  const q = (document.getElementById('ownerSearch')?.value || '').toLowerCase();
+  const list = owners.filter(o => !q || o.name.toLowerCase().includes(q) || o.phone.includes(q));
+  const tbody = document.getElementById('ownersTableBody');
+  if (!tbody) return;
+  if (list.length === 0) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:2rem; color:var(--text-muted)">Koi owner nahi mila</td></tr>'; return; }
+  tbody.innerHTML = list.map(o => {
+    const ownedRooms = rooms.filter(r => r.ownerId === o.id).length;
+    return `<tr>
+      <td><strong>${o.name}</strong></td>
+      <td>${o.phone}</td>
+      <td>${o.email || '—'}</td>
+      <td>${o.city || '—'}</td>
+      <td><span class="status-badge available">${ownedRooms} Room${ownedRooms !== 1 ? 's' : ''}</span></td>
+      <td><div class="action-btns"><button class="btn-sm btn-danger" onclick="deleteOwner('${o.id}')">🗑️</button></div></td>
+    </tr>`;
+  }).join('');
+}
+
+function adminAddOwner() {
+  const name = document.getElementById('adOwnerName')?.value?.trim();
+  const phone = document.getElementById('adOwnerPhone')?.value?.trim();
+  if (!name || !phone) { showToast('Naam aur phone zaroori hai!', 'error'); return; }
+  owners.push({ id: 'o' + Date.now(), name, phone, email: document.getElementById('adOwnerEmail')?.value || '', city: document.getElementById('adOwnerCity')?.value || '', whatsapp: phone });
+  saveData(); refreshAdminData();
+  document.getElementById('addOwnerInline').style.display = 'none';
+  ['adOwnerName','adOwnerPhone','adOwnerEmail','adOwnerCity'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  showToast('✅ Owner register ho gaya!', 'success');
+}
+
+function deleteOwner(id) {
+  if (!confirm('Owner delete karein? Unke rooms bhi delete honge!')) return;
+  owners = owners.filter(o => o.id !== id);
+  rooms = rooms.filter(r => r.ownerId !== id);
+  saveData(); refreshAdminData(); showToast('🗑️ Owner delete ho gaya', 'error');
+}
+
+function populateOwnerSelect() {
+  const sel = document.getElementById('adOwner');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">-- Owner Chunein --</option>' + owners.map(o => `<option value="${o.id}">${o.name} (${o.phone})</option>`).join('');
+}
+
+function adminAddRoom() {
+  const v = id => document.getElementById(id)?.value?.trim();
+  const required = ['adTitle','adOwner','adType','adRent','adCity','adArea','adAddress'];
+  for (const f of required) { if (!v(f)) { showToast('Sabhi required fields fill karein!', 'error'); return; } }
+  const amenities = [...document.querySelectorAll('.ad-amenity:checked')].map(c => c.value);
+  rooms.push({
+    id: 'r' + Date.now(), title: v('adTitle'), ownerId: v('adOwner'),
+    type: v('adType'), rent: parseInt(v('adRent')), city: v('adCity'),
+    area: v('adArea'), address: v('adAddress'), floor: v('adFloor'),
+    target: v('adTarget') || 'Any', status: v('adStatus') || 'available',
+    amenities, desc: v('adDesc'), photo: v('adPhoto') || '',
+    createdAt: Date.now()
+  });
+  saveData(); refreshAdminData();
+  ['adTitle','adType','adRent','adCity','adArea','adAddress','adFloor','adDesc','adPhoto'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  document.querySelectorAll('.ad-amenity').forEach(c => c.checked = false);
+  showToast('✅ Room successfully add ho gaya!', 'success');
+  showAdminPage('rooms', document.querySelectorAll('.sidebar-item')[2]);
+}
+
+// ============ UTILS ============
+function showAlert(id, msg, type) {
+  const el = document.getElementById(id);
+  if (el) { el.innerHTML = `<div class="alert alert-${type}">${msg}</div>`; setTimeout(() => el.innerHTML = '', 5000); }
+}
+
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ============ INIT ============
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+renderPublicRooms();
+updateHeroStats();
+</script>
+</body>
+</html>
